@@ -20,7 +20,7 @@ function DiabetesPredictionForm(){
         dispatch(setError(""));
         dispatch(setPrediction(null));
         try {
-            const response = await axios.post("http://127.0.0.1:5000/predict", {
+            const response = await axios.post("https://diabetes-pred-inhx.onrender.com/predict", {
                 features: [
                     formData.gender,
                     Number(formData.age),
