@@ -1,15 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    formData : {
-        pregnancies: "",
-        glucose: "",
-        bloodPressure: "",
-        skinThickness: "",
-        insulin: "",
-        bmi: "",
-        diabetesPedigreeFunction: "",
+    formData: {
+        gender: "",
         age: "",
+        hypertension: 0,
+        heart_disease: 0,
+        smoking_history: "",
+        bmi: "",
+        HbA1c_level: "",
+        blood_glucose_level: ""
     },
     loading: false,
     error: "",

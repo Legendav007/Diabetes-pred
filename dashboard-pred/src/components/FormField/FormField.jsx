@@ -8,7 +8,7 @@ import { InfoIcon , ChevronUp , ChevronDown } from 'lucide-react';
 import { Collapsible , CollapsibleContent , CollapsibleTrigger } from "../ui/collapsible";
 import { Tooltip , TooltipContent , TooltipProvider , TooltipTrigger } from "../ui/tooltip";
 
-function FormField({name , label , description , calculation}){
+function FormField({name , label , description , calculation , type}){
     const [isOpen , setIsOpen] = useState(false);
     const dispatch = useDispatch();
     const value = useSelector((state)=>state.diabetesForm.formData[name]);
@@ -31,7 +31,7 @@ function FormField({name , label , description , calculation}){
             <Input
              id = {name}
              name = {name}
-             type = "number"
+             type = {type}
              placeholder = {description}
              value = {value || ""}
              onChange = {(e)=>dispatch(updateFormData({[name] : e.target.value}))}

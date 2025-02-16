@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react";
+import store from "@/store/store";
 import { useSelector ,useDispatch } from "react-redux";
 import { setLoading , setError , setPrediction } from "@/store/diabetesFormSlice";
 import { Card , CardContent , CardDescription , CardFooter , CardHeader , CardTitle } from "./ui/card";
@@ -8,24 +9,35 @@ import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Progress } from "./ui/progress";
 import { Button } from "./ui/button";
 import FormField from "./FormField/FormField";
-
+import axios from "axios";
 
 function DiabetesPredictionForm(){
     const dispatch = useDispatch();
     const {formData , loading , error , prediction} = useSelector(state => state.diabetesForm)
-
     const handleSumbit = async (e)=>{
         e.preventDefault();
         dispatch(setLoading(true));
         dispatch(setError(""));
         dispatch(setPrediction(null));
         try {
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            const simulatedPrediction = Math.random();
-            dispatch(setPrediction(simulatedPrediction));
+            const response = await axios.post("http://127.0.0.1:5000/predict", {
+                features: [
+                    formData.gender,
+                    Number(formData.age),
+                    Number(formData.hypertension), 
+                    Number(formData.heart_disease), 
+                    formData.smoking_history,
+                    Number(formData.bmi),
+                    Number(formData.HbA1c_level),
+                    Number(formData.blood_glucose_level)
+                ]
+            });
+            dispatch(setPrediction(response.data.prediction));
+            // console.log(prediction[0])
         } catch (error) {
-            dispatch(setError("An error occurred while making the prediction. Please try again."));
-        } finally{
+            console.error("API Error:", error.response ? error.response.data : error.message);
+            dispatch(setError(error.response ? JSON.stringify(error.response.data) : "An error occurred"));
+        } finally {
             dispatch(setLoading(false));
         }
     };
@@ -47,34 +59,39 @@ function DiabetesPredictionForm(){
                     <form onSubmit={handleSumbit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <FormField
-                            name = "pregnancies"
-                            label = "Pregnancies"
-                            description="Number of times pregnant"
-                            calculation="Count the number of pregnancies, including current if applicable else 0."
+                            name = "gender"
+                            label = "Gender"
+                            description="Gender"
+                            calculation="What is your Gender"
+                            type="text"
                             />
                             <FormField
-                            name = "glucose"
-                            label = "Glucose"
-                            description="Plasma glucose concentration (mg/dL)"
-                            calculation="Measured after a 2-hour oral glucose tolerance test."
+                            name = "age"
+                            label = "Age"
+                            type = "number"
+                            description="Age"
+                            calculation="What is your age?"
                             />
                             <FormField
-                            name = "bloodPressure"
-                            label = "Blood Pressure"
-                            description="Diastolic blood pressure (mm Hg)"
+                            name = "hypertension"
+                            label = "Hypertension"
+                            type = "number"
+                            description="If you have hypertension"
                             calculation="Use the bottom number from a blood pressure reading."
                             />
                             <FormField
-                            name = "skinThickness"
-                            label = "Skin Thickness"
-                            description="Triceps skin fold thickness (mm)"
-                            calculation="Measured using calipers on the back of the upper arm."
+                            name = "heart_disease"
+                            label = "Heart Disease"
+                            type = "number"
+                            description="If you have any heart disease"
+                            calculation="Any heart related problem"
                             />
                             <FormField
-                            name="insulin"
-                            label="Insulin"
-                            description="2-Hour serum insulin (μU/mL)"
-                            calculation="Measured 2 hours after glucose load during an oral glucose tolerance test."
+                            name="smoking_history"
+                            label="Smoking History"
+                            type = "text"
+                            description="Any smoking history"
+                            calculation="Give ans in current , never , No info"
                             />
                             <FormField
                             name="bmi"
@@ -83,21 +100,24 @@ function DiabetesPredictionForm(){
                             calculation="Calculate as weight (kg) divided by height squared (m²)."
                             />
                             <FormField
-                            name="diabetesPedigreeFunction"
-                            label="Diabetes Pedigree Function"
-                            description="Diabetes pedigree function"
-                            calculation="A function that scores likelihood of diabetes based on family history."
+                            name="HbA1c_level"
+                            label="HbA1c_level"
+                            type = "number"
+                            description="What is your HbA1c_level"
+                            calculation="Hba1C"
                             />
                             <FormField
-                            name="age"
-                            label="Age"
-                            description="Age (years)"
-                            calculation="Your current age in years."
+                            name="blood_glucose_level"
+                            label="Blood Glucose Level"
+                            type = "number"
+                            description="Glucose Level"
+                            calculation="Glucose Level"
                             />
                         </div>
                         <Button
-                        type="sumbit"
-                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500"
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-blue-500 to-purple-500
+                        transform transition-transform duration-300 hover:scale-105 hover:overflow-hidden"
                         disabled={loading}
                         >
                             {loading ?
@@ -120,16 +140,14 @@ function DiabetesPredictionForm(){
                         <Alert className="mt-6 bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-blue-500">
                             <AlertTitle className="text-xl font-semibold text-blue-700">Prediction Result</AlertTitle>
                                 <AlertDescription className="mt-2">
-                                    <p className="text-gray-700 text-lg">The predicted probability of diabetes is:</p>
-                                    <div className="mt-3">
-                                        <Progress value={prediction * 100} className="h-3 bg-blue-200" />
-                                    </div>
-                                    <p className="mt-2 text-3xl font-bold text-blue-700">{(prediction * 100).toFixed(2)}%</p>
+                                    <p className="text-gray-700 text-lg">Our model predicted that you have:</p>
+                                    {/* <div className="mt-3">
+                                        { <Progress value={prediction * 100} className="h-3 bg-blue-200" /> }
+                                    </div> */}
+                                    {/* <p className="mt-2 text-3xl font-bold text-blue-700">{}%</p> */}
                                     <p className="mt-2 text-base text-gray-600">
-                                    {prediction < 0.3
+                                    {prediction[0] === 0
                                     ? "Low risk. Maintain a healthy lifestyle!"
-                                    : prediction < 0.7
-                                    ? "Moderate risk. Consider consulting a healthcare professional."
                                     : "High risk. Please consult a doctor for a thorough evaluation."}
                                      </p>
                                 </AlertDescription>
