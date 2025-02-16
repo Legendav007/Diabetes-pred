@@ -36,7 +36,7 @@ function DiabetesPredictionForm(){
             // console.log(prediction[0])
         } catch (error) {
             console.error("API Error:", error.response ? error.response.data : error.message);
-            dispatch(setError(error.response ? JSON.stringify(error.response.data) : "An error occurred"));
+            dispatch(setError(error.response ? JSON.stringify(error.response.data) : "An error occurred.Try again"));
         } finally {
             dispatch(setLoading(false));
         }
